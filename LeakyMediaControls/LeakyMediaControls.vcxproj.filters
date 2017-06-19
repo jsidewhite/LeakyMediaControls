@@ -38,6 +38,9 @@
     <ClCompile Include="LeakyMediaControls.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LeakyMediaControls.rc">
