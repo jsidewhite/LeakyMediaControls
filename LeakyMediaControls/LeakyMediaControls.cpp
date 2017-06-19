@@ -14,7 +14,7 @@ void RegisterHotkeys(HWND hWnd)
 	//if (!RegisterHotKey(hWnd, 1, MOD_ALT | MOD_NOREPEAT, VK_F2))
 	if (!RegisterHotKey(hWnd, 1, MOD_NOREPEAT, VK_F2))
 	{
-		throw std::runtime_error("Couldn't register hotkey");
+		throw my_exception(L"Couldn't register hotkey");
 	}
 
 	//0x56 is 'v'
@@ -22,7 +22,7 @@ void RegisterHotkeys(HWND hWnd)
 	//if (!RegisterHotKey(hWnd, 1, MOD_ALT | MOD_NOREPEAT, VK_F1))
 	if (!RegisterHotKey(hWnd, 1, MOD_NOREPEAT, VK_F1))
 	{
-		throw std::runtime_error("Couldn't register hotkey");
+		throw my_exception(L"Couldn't register hotkey");
 	}
 }
 
@@ -52,6 +52,15 @@ void CreateSystemTrayIcon(HWND hWnd)
 	Shell_NotifyIcon(NIM_ADD, &nid);
 }
 
+void DestroySystemTrayIcon(HWND hWnd)
+{
+	NOTIFYICONDATA nid;
+	nid.cbSize = sizeof(NOTIFYICONDATA);
+	nid.hWnd = hWnd;
+	nid.uID = 100;
+	Shell_NotifyIcon(NIM_DELETE, &nid);
+}
+
 void HandleHotkeySequencePress(UINT hotkey)
 {
 	WORD specialKey;
@@ -66,7 +75,7 @@ void HandleHotkeySequencePress(UINT hotkey)
 	}
 	else
 	{
-		throw std::runtime_error("Unknown hotkey");
+		throw my_exception(L"Unknown hotkey");
 	}
 
 	//if (val == 0x42)

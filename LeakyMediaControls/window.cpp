@@ -111,8 +111,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	g_hwnd = hWnd;
 
-	RegisterHotkeys(hWnd);
-	CreateSystemTrayIcon(hWnd);
+	catch_and_show(hWnd, [&]() {
+		RegisterHotkeys(hWnd);
+		CreateSystemTrayIcon(hWnd);
+	});
 
 	// Don't show window
 	//ShowWindow(hWnd, nCmdShow);
@@ -138,7 +140,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_HOTKEY:
 	{
 		UINT hotkey = HIWORD(lParam);
-		HandleHotkeySequencePress(hotkey);
+		catch_and_show(hWnd, [&]() {
+			HandleHotkeySequencePress(hotkey);
+		});
 	}
 	break;
 
@@ -186,11 +190,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	break;
 	case WM_DESTROY:
 
-		NOTIFYICONDATA nid;
-		nid.cbSize = sizeof(NOTIFYICONDATA);
-		nid.hWnd = hWnd;
-		nid.uID = 100;
-		Shell_NotifyIcon(NIM_DELETE, &nid);
+		DestroySystemTrayIcon(hWnd);
 
 		PostQuitMessage(0);
 		break;
