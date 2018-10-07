@@ -5,6 +5,9 @@
 #include <shellapi.h>
 #include "LeakyMediaControls.h"
 
+UINT g_prevSongHotkey = VK_F1;
+UINT g_nextSongHotkey = VK_F2;
+
 //INT_PTR CALLBACK	TrayWindow(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
 void RegisterHotkeys(HWND hWnd)
@@ -12,7 +15,7 @@ void RegisterHotkeys(HWND hWnd)
 	//0x42 is 'b'
 	//if (!RegisterHotKey(hWnd, 1, MOD_ALT | MOD_NOREPEAT, 0x42))
 	//if (!RegisterHotKey(hWnd, 1, MOD_ALT | MOD_NOREPEAT, VK_F2))
-	if (!RegisterHotKey(hWnd, 1, MOD_NOREPEAT, VK_F2))
+	if (!RegisterHotKey(hWnd, 1, MOD_NOREPEAT, g_nextSongHotkey))
 	{
 		throw my_exception(L"Couldn't register hotkey");
 	}
@@ -20,7 +23,7 @@ void RegisterHotkeys(HWND hWnd)
 	//0x56 is 'v'
 	//if (!RegisterHotKey(hWnd, 1, MOD_ALT | MOD_NOREPEAT, 0x56))
 	//if (!RegisterHotKey(hWnd, 1, MOD_ALT | MOD_NOREPEAT, VK_F1))
-	if (!RegisterHotKey(hWnd, 1, MOD_NOREPEAT, VK_F1))
+	if (!RegisterHotKey(hWnd, 1, MOD_NOREPEAT, g_prevSongHotkey))
 	{
 		throw my_exception(L"Couldn't register hotkey");
 	}
