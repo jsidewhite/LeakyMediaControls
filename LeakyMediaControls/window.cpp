@@ -1,7 +1,5 @@
-// LeakyMediaControls.cpp : Defines the entry point for the application.
-//
-
-#include "stdafx.h"
+#include <iostream>
+#include <windows.h>
 #include <shellapi.h>
 #include "LeakyMediaControls.h"
 
@@ -161,6 +159,31 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	CreateWindow(TEXT("button"), TEXT("Set Key"),
 		WS_VISIBLE | WS_CHILD | BS_TEXT,
 		200, 70, 80, 25,
+		//hWnd, (HMENU)1, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+		hWnd, (HMENU)1, GetModuleHandle(NULL), NULL);
+
+
+
+
+
+	std::wstring toggleDefaultSoundOutputDevice(L"n/a");
+	if (g_toggleDefaultSoundOutputDeviceHotkey == VK_F12)
+	{
+		toggleDefaultSoundOutputDevice = std::wstring(L"F12");
+	}
+
+	CreateWindow(TEXT("STATIC"), TEXT("Toggle Default Sound Output Device Hotkey"),
+		WS_VISIBLE | WS_CHILD | BS_TEXT,
+		400, 10, 320, 25,
+		//hWnd, (HMENU)1, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
+		hWnd, (HMENU)1, GetModuleHandle(NULL), NULL);
+
+	CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", toggleDefaultSoundOutputDevice.c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
+		400, 40, 30, 21, hWnd, NULL, NULL, NULL);
+
+	CreateWindow(TEXT("button"), TEXT("Set Key"),
+		WS_VISIBLE | WS_CHILD | BS_TEXT,
+		400, 70, 80, 25,
 		//hWnd, (HMENU)1, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
 		hWnd, (HMENU)1, GetModuleHandle(NULL), NULL);
 

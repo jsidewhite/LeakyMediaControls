@@ -1,12 +1,15 @@
 #pragma once
 
 #include "resource.h"
+#include <string>
+
 
 #define WM_MYMESSAGE (WM_USER + 1)
 
 extern HWND g_hwnd;
 extern UINT g_prevSongHotkey;
 extern UINT g_nextSongHotkey;
+extern UINT g_toggleDefaultSoundOutputDeviceHotkey;
 
 void DoExitSequence();
 void RegisterHotkeys(HWND hWnd);

@@ -1,12 +1,11 @@
-// LeakyMediaControls.cpp : Defines the entry point for the application.
-//
-
-#include "stdafx.h"
+#include <windows.h>
 #include <shellapi.h>
 #include "LeakyMediaControls.h"
+#include "SoundDeviceEndpoint.h"
 
 UINT g_prevSongHotkey = VK_F1;
 UINT g_nextSongHotkey = VK_F2;
+UINT g_toggleDefaultSoundOutputDeviceHotkey = VK_F3;
 
 //INT_PTR CALLBACK	TrayWindow(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -24,6 +23,14 @@ void RegisterHotkeys(HWND hWnd)
 	//if (!RegisterHotKey(hWnd, 1, MOD_ALT | MOD_NOREPEAT, 0x56))
 	//if (!RegisterHotKey(hWnd, 1, MOD_ALT | MOD_NOREPEAT, VK_F1))
 	if (!RegisterHotKey(hWnd, 1, MOD_NOREPEAT, g_prevSongHotkey))
+	{
+		throw my_exception(L"Couldn't register hotkey");
+	}
+
+	//0x56 is 'v'
+	//if (!RegisterHotKey(hWnd, 1, MOD_ALT | MOD_NOREPEAT, 0x56))
+	//if (!RegisterHotKey(hWnd, 1, MOD_ALT | MOD_NOREPEAT, VK_F1))
+	if (!RegisterHotKey(hWnd, 1, MOD_NOREPEAT, g_toggleDefaultSoundOutputDeviceHotkey))
 	{
 		throw my_exception(L"Couldn't register hotkey");
 	}
@@ -75,6 +82,11 @@ void HandleHotkeySequencePress(UINT hotkey)
 	else if (hotkey == VK_F1)
 	{
 		specialKey = VK_MEDIA_PREV_TRACK;
+	}
+	else if (hotkey == VK_F3)
+	{
+		ToggleSoundDeviceEndpoint();
+		return;
 	}
 	else
 	{

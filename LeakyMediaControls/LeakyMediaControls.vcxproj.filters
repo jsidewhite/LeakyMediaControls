@@ -18,9 +18,6 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -30,15 +27,21 @@
     <ClInclude Include="LeakyMediaControls.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IPolicyConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundDeviceEndpoint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LeakyMediaControls.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundDeviceEndpoint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
