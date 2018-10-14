@@ -145,12 +145,13 @@
   <ItemGroup>
     <ClInclude Include="IPolicyConfig.h" />
     <ClInclude Include="LeakyMediaControls.h" />
+    <ClInclude Include="LeakyMediaControls.window.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SoundDeviceEndpoint.h" />
-    <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LeakyMediaControls.cpp" />
+    <ClCompile Include="LeakyMediaControls.window.cpp" />
     <ClCompile Include="SoundDeviceEndpoint.cpp" />
     <ClCompile Include="window.cpp" />
   </ItemGroup>

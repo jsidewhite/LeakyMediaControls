@@ -2,39 +2,31 @@
 #include <windows.h>
 #include <shellapi.h>
 #include "LeakyMediaControls.h"
+#include "LeakyMediaControls.window.h"
 
 #define MAX_LOADSTRING 100
 
 HWND g_hwnd;
 
-// Global Variables:
-HINSTANCE hInst;                                // current instance
+HINSTANCE g_hinstance;
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 
-// Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	TrayWindow(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-	_In_opt_ HINSTANCE hPrevInstance,
-	_In_ LPWSTR    lpCmdLine,
-	_In_ int       nCmdShow)
+int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
-	UNREFERENCED_PARAMETER(hPrevInstance);
-	UNREFERENCED_PARAMETER(lpCmdLine);
-
-	// TODO: Place code here.
-
-	// Initialize global strings
+	(void)hPrevInstance;
+	(void)lpCmdLine;
+	
 	LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	LoadStringW(hInstance, IDC_LEAKYMEDIACONTROLS, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
-	// Perform application initialization:
 	if (!InitInstance(hInstance, nCmdShow))
 	{
 		return FALSE;
@@ -44,7 +36,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	MSG msg;
 
-	// Main message loop:
 	while (GetMessage(&msg, nullptr, 0, 0))
 	{
 		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
@@ -54,16 +45,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 	}
 
-	return (int)msg.wParam;
+	return static_cast<int>(msg.wParam);
 }
 
-
-
-//
-//  FUNCTION: MyRegisterClass()
-//
-//  PURPOSE: Registers the window class.
-//
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
 	WNDCLASSEXW wcex;
@@ -85,145 +69,26 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	return RegisterClassExW(&wcex);
 }
 
-//
-//   FUNCTION: InitInstance(HINSTANCE, int)
-//
-//   PURPOSE: Saves instance handle and creates main window
-//
-//   COMMENTS:
-//
-//        In this function, we save the instance handle in a global variable and
-//        create and display the main program window.
-//
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
+BOOL InitInstance(HINSTANCE hinstance, int nCmdShow)
 {
-	hInst = hInstance; // Store instance handle in our global variable
+	g_hinstance = hinstance;
 
-	HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+	HWND hwnd = leakymediacontrols::MakeWindow(hinstance, szTitle, szWindowClass);
 
-	/*
-	CreateWindow(TEXT("button"), TEXT("Show Title"),
-		WS_VISIBLE | WS_CHILD | BS_CHECKBOX,
-		10, 20, 185, 35,
-		//hWnd, (HMENU)1, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
-		hWnd, (HMENU)1, GetModuleHandle(NULL), NULL);
-
-	CreateWindow(TEXT("edit"), TEXT("Show Title"),
-		WS_VISIBLE | WS_CHILD | BS_TEXT,
-		10, 50, 185, 35,
-		//hWnd, (HMENU)1, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
-		hWnd, (HMENU)1, GetModuleHandle(NULL), NULL);
-		*/
-
-
-	std::wstring prevKey(L"n/a");
-	if (g_prevSongHotkey == VK_F1)
-	{
-		prevKey = std::wstring(L"F1");
-	}
-
-	CreateWindow(TEXT("STATIC"), TEXT("Previous Song Hotkey"),
-		WS_VISIBLE | WS_CHILD | BS_TEXT,
-		10, 10, 160, 25,
-		//hWnd, (HMENU)1, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
-		hWnd, (HMENU)1, GetModuleHandle(NULL), NULL);
-
-	CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", prevKey.c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
-		10, 40, 30, 21, hWnd, NULL, NULL, NULL);
-
-	CreateWindow(TEXT("button"), TEXT("Set Key"),
-		WS_VISIBLE | WS_CHILD | BS_TEXT,
-		10, 70, 80, 25,
-		//hWnd, (HMENU)1, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
-		hWnd, (HMENU)1, GetModuleHandle(NULL), NULL);
-
-
-
-
-	std::wstring nextKey(L"n/a");
-	if (g_nextSongHotkey == VK_F2)
-	{
-		nextKey = std::wstring(L"F2");
-	}
-
-	CreateWindow(TEXT("STATIC"), TEXT("Next Song Hotkey"),
-		WS_VISIBLE | WS_CHILD | BS_TEXT,
-		200, 10, 160, 25,
-		//hWnd, (HMENU)1, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
-		hWnd, (HMENU)1, GetModuleHandle(NULL), NULL);
-
-	CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", nextKey.c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
-		200, 40, 30, 21, hWnd, NULL, NULL, NULL);
-
-	CreateWindow(TEXT("button"), TEXT("Set Key"),
-		WS_VISIBLE | WS_CHILD | BS_TEXT,
-		200, 70, 80, 25,
-		//hWnd, (HMENU)1, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
-		hWnd, (HMENU)1, GetModuleHandle(NULL), NULL);
-
-
-
-
-
-	std::wstring toggleDefaultSoundOutputDevice(L"n/a");
-	if (g_toggleDefaultSoundOutputDeviceHotkey == VK_F12)
-	{
-		toggleDefaultSoundOutputDevice = std::wstring(L"F12");
-	}
-
-	CreateWindow(TEXT("STATIC"), TEXT("Toggle Default Sound Output Device Hotkey"),
-		WS_VISIBLE | WS_CHILD | BS_TEXT,
-		400, 10, 320, 25,
-		//hWnd, (HMENU)1, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
-		hWnd, (HMENU)1, GetModuleHandle(NULL), NULL);
-
-	CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", toggleDefaultSoundOutputDevice.c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
-		400, 40, 30, 21, hWnd, NULL, NULL, NULL);
-
-	CreateWindow(TEXT("button"), TEXT("Set Key"),
-		WS_VISIBLE | WS_CHILD | BS_TEXT,
-		400, 70, 80, 25,
-		//hWnd, (HMENU)1, ((LPCREATESTRUCT)lParam)->hInstance, NULL);
-		hWnd, (HMENU)1, GetModuleHandle(NULL), NULL);
-
-
-
-
-	
-
-
-	CheckDlgButton(hWnd, 1, BST_UNCHECKED);
-
-	if (!hWnd)
+	if (!hwnd)
 	{
 		return FALSE;
 	}
 
-	g_hwnd = hWnd;
-
-	catch_and_show(hWnd, [&]() {
-		RegisterHotkeys(hWnd);
-		CreateSystemTrayIcon(hWnd);
-	});
+	g_hwnd = hwnd;
 
 	// Don't show window
-	ShowWindow(hWnd, nCmdShow);
-	UpdateWindow(hWnd);
+	ShowWindow(hwnd, nCmdShow);
+	UpdateWindow(hwnd);
 
 	return TRUE;
 }
 
-//
-//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  PURPOSE:  Processes messages for the main window.
-//
-//  WM_COMMAND  - process the application menu
-//  WM_PAINT    - Paint the main window
-//  WM_DESTROY  - post a quit message and return
-//
-//
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
@@ -261,7 +126,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (wmId)
 		{
 		case IDM_ABOUT:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+			DialogBox(g_hinstance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			break;
 		case IDM_EXIT:
 			DestroyWindow(hWnd);

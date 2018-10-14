@@ -5,7 +5,7 @@
 
 UINT g_prevSongHotkey = VK_F1;
 UINT g_nextSongHotkey = VK_F2;
-UINT g_toggleDefaultSoundOutputDeviceHotkey = VK_F3;
+UINT g_toggleDefaultSoundOutputDeviceHotkey = VK_F6;
 
 //INT_PTR CALLBACK	TrayWindow(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -83,7 +83,7 @@ void HandleHotkeySequencePress(UINT hotkey)
 	{
 		specialKey = VK_MEDIA_PREV_TRACK;
 	}
-	else if (hotkey == VK_F3)
+	else if (hotkey == VK_F6)
 	{
 		ToggleSoundDeviceEndpoint();
 		return;
