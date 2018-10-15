@@ -1,7 +1,6 @@
 #pragma once
 
 #include <windows.h>
-#include "LeakyMediaControls.h"
 
 namespace leakymediacontrols
 {

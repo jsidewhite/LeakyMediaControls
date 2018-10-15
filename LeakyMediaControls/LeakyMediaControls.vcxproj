@@ -148,6 +148,7 @@
     <ClInclude Include="LeakyMediaControls.window.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SoundDeviceEndpoint.h" />
+    <ClInclude Include="win32_abstraction.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LeakyMediaControls.cpp" />

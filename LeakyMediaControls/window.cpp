@@ -3,6 +3,7 @@
 #include <shellapi.h>
 #include "LeakyMediaControls.h"
 #include "LeakyMediaControls.window.h"
+#include "resource.h"
 
 #define MAX_LOADSTRING 100
 
@@ -97,7 +98,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		UINT hotkey = HIWORD(lParam);
 		catch_and_show(hWnd, [&]() {
-			HandleHotkeySequencePress(hotkey);
+			leakymediacontrols::HandleHotkeySequencePress(hotkey);
 		});
 	}
 	break;
@@ -110,7 +111,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			//case WM_LBUTTONDBLCLK:
 			if (IDYES == MessageBoxW(NULL, L"Exit the program?", L"LeakyMediaControls", MB_YESNO))
 			{
-				DoExitSequence();
+				leakymediacontrols::DoExitSequence();
 			}
 			//DialogBox(hInst, MAKEINTRESOURCE(IDM_EXIT), hWnd, TrayWindow);
 			break;
@@ -126,7 +127,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (wmId)
 		{
 		case IDM_ABOUT:
-			DialogBox(g_hinstance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+			DialogBox(g_hinstance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, leakymediacontrols::About);
 			break;
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
@@ -146,7 +147,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	break;
 	case WM_DESTROY:
 
-		DestroySystemTrayIcon(hWnd);
+		leakymediacontrols::DestroySystemTrayIcon(hWnd);
 
 		PostQuitMessage(0);
 		break;
