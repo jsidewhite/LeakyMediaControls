@@ -14,12 +14,8 @@ extern UINT g_toggleDefaultSoundOutputDeviceHotkey;
 
 namespace leakymediacontrols
 {
-	void DoExitSequence();
 	void RegisterHotkeys(HWND hWnd);
-	void CreateSystemTrayIcon(HWND hWnd);
-	void DestroySystemTrayIcon(HWND hWnd);
-	void HandleHotkeySequencePress(UINT hotkey);
-	INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+	void HandleHotkeyPress(UINT hotkey);
 }
 
 template <typename F>

@@ -98,7 +98,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		UINT hotkey = HIWORD(lParam);
 		catch_and_show(hWnd, [&]() {
-			leakymediacontrols::HandleHotkeySequencePress(hotkey);
+			leakymediacontrols::HandleHotkeyPress(hotkey);
 		});
 	}
 	break;
