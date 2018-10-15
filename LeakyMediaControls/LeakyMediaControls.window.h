@@ -4,6 +4,7 @@
 
 namespace leakymediacontrols
 {
+	void Initialize();
 	HWND MakeWindow(HINSTANCE hinstance, LPCWSTR szTitle, LPCWSTR szWindowClass);
 	void DoExitSequence();
 	void CreateSystemTrayIcon(HWND hWnd);

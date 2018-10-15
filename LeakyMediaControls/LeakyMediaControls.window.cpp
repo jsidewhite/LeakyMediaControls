@@ -5,6 +5,8 @@
 
 namespace leakymediacontrols
 {
+	//INT_PTR CALLBACK	TrayWindow(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+
 	HWND MakeWindow(HINSTANCE hinstance, LPCWSTR szTitle, LPCWSTR szWindowClass)
 	{
 		HWND hwnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hinstance, nullptr);
@@ -54,8 +56,6 @@ namespace leakymediacontrols
 
 		return hwnd;
 	}
-
-
 
 	void CreateSystemTrayIcon(HWND hWnd)
 	{

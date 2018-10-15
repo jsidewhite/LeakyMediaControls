@@ -74,6 +74,8 @@ BOOL InitInstance(HINSTANCE hinstance, int nCmdShow)
 {
 	g_hinstance = hinstance;
 
+	leakymediacontrols::Initialize();
+
 	HWND hwnd = leakymediacontrols::MakeWindow(hinstance, szTitle, szWindowClass);
 
 	if (!hwnd)
