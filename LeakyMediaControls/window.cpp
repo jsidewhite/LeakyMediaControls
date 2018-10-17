@@ -5,91 +5,27 @@
 #include "LeakyMediaControls.window.h"
 #include "resource.h"
 
-#define MAX_LOADSTRING 100
-
 HWND g_hwnd;
-
 HINSTANCE g_hinstance;
-WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
-WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 
-ATOM                MyRegisterClass(HINSTANCE hInstance);
-BOOL                InitInstance(HINSTANCE, int);
-LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK	TrayWindow(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
-
-int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
-{
-	(void)hPrevInstance;
-	(void)lpCmdLine;
-	
-	LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	LoadStringW(hInstance, IDC_LEAKYMEDIACONTROLS, szWindowClass, MAX_LOADSTRING);
-	MyRegisterClass(hInstance);
-
-	if (!InitInstance(hInstance, nCmdShow))
-	{
-		return FALSE;
-	}
-
-	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_LEAKYMEDIACONTROLS));
-
-	MSG msg;
-
-	while (GetMessage(&msg, nullptr, 0, 0))
-	{
-		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-	}
-
-	return static_cast<int>(msg.wParam);
-}
-
-ATOM MyRegisterClass(HINSTANCE hInstance)
-{
-	WNDCLASSEXW wcex;
-
-	wcex.cbSize = sizeof(WNDCLASSEX);
-
-	wcex.style = CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc = WndProc;
-	wcex.cbClsExtra = 0;
-	wcex.cbWndExtra = 0;
-	wcex.hInstance = hInstance;
-	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_LEAKYMEDIACONTROLS));
-	wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
-	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_LEAKYMEDIACONTROLS);
-	wcex.lpszClassName = szWindowClass;
-	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
-
-	return RegisterClassExW(&wcex);
-}
-
-BOOL InitInstance(HINSTANCE hinstance, int nCmdShow)
+bool InitInstance(HINSTANCE hinstance, int nCmdShow, std::wstring const & title, std::wstring const & windowClass)
 {
 	g_hinstance = hinstance;
 
 	leakymediacontrols::Initialize();
-
-	HWND hwnd = leakymediacontrols::MakeWindow(hinstance, szTitle, szWindowClass);
+	HWND hwnd = leakymediacontrols::MakeWindow(hinstance, title, windowClass);
 
 	if (!hwnd)
 	{
-		return FALSE;
+		return false;
 	}
 
 	g_hwnd = hwnd;
 
-	// Don't show window
 	ShowWindow(hwnd, nCmdShow);
 	UpdateWindow(hwnd);
 
-	return TRUE;
+	return true;
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -157,4 +93,59 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	return 0;
+}
+
+ATOM MyRegisterClass(HINSTANCE hInstance, std::wstring const & windowClass)
+{
+	WNDCLASSEXW wcex;
+	wcex.cbSize = sizeof(WNDCLASSEX);
+	wcex.style = CS_HREDRAW | CS_VREDRAW;
+	wcex.lpfnWndProc = WndProc;
+	wcex.cbClsExtra = 0;
+	wcex.cbWndExtra = 0;
+	wcex.hInstance = hInstance;
+	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_LEAKYMEDIACONTROLS));
+	wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_LEAKYMEDIACONTROLS);
+	wcex.lpszClassName = windowClass.c_str();
+	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+	return RegisterClassExW(&wcex);
+}
+
+int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
+{
+	(void)hPrevInstance;
+	(void)lpCmdLine;
+
+	wchar_t szTitle[100];
+	wchar_t szWindowClass[100];
+
+	LoadStringW(hInstance, IDS_APP_TITLE, szTitle, 100);
+	LoadStringW(hInstance, IDC_LEAKYMEDIACONTROLS, szWindowClass, 100);
+
+	auto title = std::wstring(szTitle);
+	auto windowClass = std::wstring(szWindowClass);
+
+	MyRegisterClass(hInstance, windowClass);
+
+	if (!InitInstance(hInstance, nCmdShow, title, windowClass))
+	{
+		return FALSE;
+	}
+
+	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_LEAKYMEDIACONTROLS));
+
+	MSG msg;
+
+	while (GetMessage(&msg, nullptr, 0, 0))
+	{
+		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	}
+
+	return static_cast<int>(msg.wParam);
 }

@@ -5,11 +5,11 @@
 
 namespace leakymediacontrols
 {
-	//INT_PTR CALLBACK	TrayWindow(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+	//INT_PTR CALLBACK	TrayWindow(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);c
 
-	HWND MakeWindow(HINSTANCE hinstance, LPCWSTR szTitle, LPCWSTR szWindowClass)
+	HWND MakeWindow(HINSTANCE hinstance, std::wstring const & title, std::wstring const & windowClass)
 	{
-		HWND hwnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hinstance, nullptr);
+		HWND hwnd = CreateWindowW(windowClass.c_str(), title.c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hinstance, nullptr);
 
 		std::wstring prevKey(L"n/a");
 		if (g_prevSongHotkey == VK_F1)
