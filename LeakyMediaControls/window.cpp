@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <windows.h>
 #include <shellapi.h>
 #include "LeakyMediaControls.h"
@@ -12,8 +13,12 @@ bool InitInstance(HINSTANCE hinstance, int nCmdShow, std::wstring const & title,
 {
 	g_hinstance = hinstance;
 
-	leakymediacontrols::Initialize();
 	HWND hwnd = leakymediacontrols::MakeWindow(hinstance, title, windowClass);
+	
+	catch_and_show(hwnd, [&](HWND hwnd) {
+		leakymediacontrols::Initialize();
+		leakymediacontrols::FillWindow(hwnd);
+	});
 
 	if (!hwnd)
 	{
@@ -28,14 +33,14 @@ bool InitInstance(HINSTANCE hinstance, int nCmdShow, std::wstring const & title,
 	return true;
 }
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
 	case WM_HOTKEY:
 	{
 		UINT hotkey = HIWORD(lParam);
-		catch_and_show(hWnd, [&]() {
+		catch_and_show(hwnd, [&](HWND hwnd) {
 			leakymediacontrols::HandleHotkeyPress(hotkey);
 		});
 	}
@@ -54,7 +59,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			//DialogBox(hInst, MAKEINTRESOURCE(IDM_EXIT), hWnd, TrayWindow);
 			break;
 		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
+			return DefWindowProc(hwnd, message, wParam, lParam);
 		};
 	}
 	break;
@@ -65,32 +70,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switch (wmId)
 		{
 		case IDM_ABOUT:
-			DialogBox(g_hinstance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, leakymediacontrols::About);
+			DialogBox(g_hinstance, MAKEINTRESOURCE(IDD_ABOUTBOX), hwnd, leakymediacontrols::About);
 			break;
 		case IDM_EXIT:
-			DestroyWindow(hWnd);
+			DestroyWindow(hwnd);
 			break;
 		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
+			return DefWindowProc(hwnd, message, wParam, lParam);
 		}
 	}
 	break;
 	case WM_PAINT:
 	{
 		PAINTSTRUCT ps;
-		HDC hdc = BeginPaint(hWnd, &ps);
+		HDC hdc = BeginPaint(hwnd, &ps);
 		// TODO: Add any drawing code that uses hdc here...
-		EndPaint(hWnd, &ps);
+		EndPaint(hwnd, &ps);
 	}
 	break;
 	case WM_DESTROY:
 
-		leakymediacontrols::DestroySystemTrayIcon(hWnd);
+		leakymediacontrols::DestroySystemTrayIcon(hwnd);
 
 		PostQuitMessage(0);
 		break;
 	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
+		return DefWindowProc(hwnd, message, wParam, lParam);
 	}
 	return 0;
 }
@@ -137,7 +142,6 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_LEAKYMEDIACONTROLS));
 
 	MSG msg;
-
 	while (GetMessage(&msg, nullptr, 0, 0))
 	{
 		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))

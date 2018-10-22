@@ -1,10 +1,9 @@
 #include <iostream>
 #include <windows.h>
 #include <mmdeviceapi.h>
+#include "inc.h"
 #include <Functiondiscoverykeys_devpkey.h>
 #include "IPolicyConfig.h"
-
-#define THROW_IF_FAILED(x) do{HRESULT hr = S_OK; hr = (x); if (FAILED(hr)){throw 1;}}while(false)
 
 using namespace std;
 

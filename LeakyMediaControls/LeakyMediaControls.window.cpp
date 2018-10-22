@@ -10,7 +10,11 @@ namespace leakymediacontrols
 	HWND MakeWindow(HINSTANCE hinstance, std::wstring const & title, std::wstring const & windowClass)
 	{
 		HWND hwnd = CreateWindowW(windowClass.c_str(), title.c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hinstance, nullptr);
+		return hwnd;
+	}
 
+	void FillWindow(HWND hwnd)
+	{
 		std::wstring prevKey(L"n/a");
 		if (g_prevSongHotkey == VK_F1)
 		{
@@ -36,10 +40,11 @@ namespace leakymediacontrols
 		CreateWindow(TEXT("button"), TEXT("Set Key"), WS_VISIBLE | WS_CHILD | BS_TEXT, 200, 70, 80, 25, hwnd, (HMENU)1, GetModuleHandle(NULL), NULL);
 
 		std::wstring toggleDefaultSoundOutputDevice(L"n/a");
-		if (g_toggleDefaultSoundOutputDeviceHotkey == VK_F12)
-		{
-			toggleDefaultSoundOutputDevice = std::wstring(L"F12");
-		}
+		//if (g_toggleDefaultSoundOutputDeviceHotkey == VK_F12)
+		//{
+			//toggleDefaultSoundOutputDevice = std::wstring(L"F12");
+			toggleDefaultSoundOutputDevice = std::wstring(std::to_wstring(g_toggleDefaultSoundOutputDeviceHotkey));
+		//}
 
 		CreateWindow(TEXT("STATIC"), TEXT("Toggle Default Sound Output Device Hotkey"), WS_VISIBLE | WS_CHILD | BS_TEXT, 400, 10, 320, 25, hwnd, (HMENU)1, GetModuleHandle(NULL), NULL);
 
@@ -49,12 +54,8 @@ namespace leakymediacontrols
 
 		CheckDlgButton(hwnd, 1, BST_UNCHECKED);
 
-		catch_and_show(hwnd, [&]() {
-			RegisterHotkeys(hwnd);
-			CreateSystemTrayIcon(hwnd);
-		});
-
-		return hwnd;
+		RegisterHotkeys(hwnd);
+		CreateSystemTrayIcon(hwnd);
 	}
 
 	void CreateSystemTrayIcon(HWND hWnd)

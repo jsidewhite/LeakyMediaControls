@@ -1,16 +1,25 @@
 #include <algorithm>
+#include <filesystem>
+#include <fstream>
+#include <functional>
 #include <vector>
 #include <windows.h>
 #include <shellapi.h>
+#include <shlobj.h>
+#include <atlbase.h>
+#include "inc.h"
 #include "LeakyMediaControls.h"
 #include "SoundDeviceEndpoint.h"
 #include "win32_abstraction.h"
-#include "functional"
 #include "resource.h"
+#include "inih.h"
 
 UINT g_prevSongHotkey = VK_F1;
 UINT g_nextSongHotkey = VK_F2;
 UINT g_toggleDefaultSoundOutputDeviceHotkey = VK_F6;
+
+#include <iostream>
+#include <sstream>
 
 namespace leakymediacontrols
 {
@@ -35,17 +44,70 @@ namespace leakymediacontrols
 
 	void Initialize()
 	{
-		g_hotkeyBindings.push_back(hotkey_binding(VK_F1, []() {
-			win32_abstraction::SendKeyStroke(VK_MEDIA_PREV_TRACK);
-		}));
+		namespace fs = std::experimental::filesystem;
 
-		g_hotkeyBindings.push_back(hotkey_binding(VK_F2, []() {
-			win32_abstraction::SendKeyStroke(VK_MEDIA_NEXT_TRACK);
-		}));
+		// AppData
+		CComHeapPtr<WCHAR> appdataPath;
+		THROW_IF_FAILED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_DEFAULT, NULL, &appdataPath));
 
-		g_hotkeyBindings.push_back(hotkey_binding(VK_F6, []() {
-			ToggleSoundDeviceEndpoint();
-		}));
+		fs::path dataDirectory = fs::path(static_cast<LPWSTR>(appdataPath)) / L"LeakyMediaControls";
+		fs::create_directories(dataDirectory);
+
+		auto configFile = dataDirectory / L"config.ini";
+
+		INIReader reader(configFile.string());
+
+		if (reader.ParseError() < 0) 
+		{
+			throw win32_abstraction::exception(L"Can't parse config.ini");
+		}
+
+		auto g_prevSongHotkey = reader.GetInteger("settings", "prevTrackKeycode", -1);
+		if (g_prevSongHotkey == -1)
+		{
+			g_prevSongHotkey = VK_F1;
+		}
+		
+
+		auto g_nextSongHotkey = reader.GetInteger("settings", "nextTrackKeycode", -1);
+		if (g_nextSongHotkey == -1)
+		{
+			g_nextSongHotkey = VK_F2;
+		}
+
+		auto g_toggleDefaultSoundOutputDeviceHotkey = reader.GetInteger("settings", "toggleSoundOutput", -1);
+		if (g_toggleDefaultSoundOutputDeviceHotkey == -1)
+		{
+			g_toggleDefaultSoundOutputDeviceHotkey = VK_F6;
+		}
+
+		std::wstringstream ss;
+		ss << L" "<< g_toggleDefaultSoundOutputDeviceHotkey << L" " << VK_F6;
+		//MessageBox(hwnd, ss.str().c_str(), L"LeakyMediaControls failure", MB_OK);
+		//throw win32_abstraction::exception(ss.str().c_str());
+
+
+		// Assign bindings
+		if (g_prevSongHotkey > 0)
+		{
+			g_hotkeyBindings.push_back(hotkey_binding(g_prevSongHotkey, []() {
+				win32_abstraction::SendKeyStroke(VK_MEDIA_PREV_TRACK);
+			}));
+		}
+
+		if (g_nextSongHotkey != 0)
+		{
+			g_hotkeyBindings.push_back(hotkey_binding(g_nextSongHotkey, []() {
+				win32_abstraction::SendKeyStroke(VK_MEDIA_NEXT_TRACK);
+			}));
+		}
+
+		if (g_toggleDefaultSoundOutputDeviceHotkey != 0)
+		{
+			g_hotkeyBindings.push_back(hotkey_binding(g_toggleDefaultSoundOutputDeviceHotkey, []() {
+				ToggleSoundDeviceEndpoint();
+			}));
+		}
 	}
 
 	void RegisterHotkeys(HWND hwnd)

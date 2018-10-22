@@ -14,19 +14,20 @@ extern UINT g_toggleDefaultSoundOutputDeviceHotkey;
 
 namespace leakymediacontrols
 {
+	void Initialize();
 	void RegisterHotkeys(HWND hWnd);
 	void HandleHotkeyPress(UINT hotkey);
 }
 
 template <typename F>
-void catch_and_show(HWND hWnd, F&& func)
+void catch_and_show(HWND hwnd, F&& func)
 {
 	try
 	{
-		func();
+		func(hwnd);
 	}
 	catch (win32_abstraction::exception const & e)
 	{
-		MessageBox(hWnd, e.wide_what().c_str(), L"LeakyMediaControls failure", MB_OK);
+		MessageBox(hwnd, e.wide_what().c_str(), L"LeakyMediaControls failure", MB_OK);
 	}
 }

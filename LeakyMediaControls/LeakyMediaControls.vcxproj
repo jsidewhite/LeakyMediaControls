@@ -143,6 +143,8 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="inc.h" />
+    <ClInclude Include="inih.h" />
     <ClInclude Include="IPolicyConfig.h" />
     <ClInclude Include="LeakyMediaControls.h" />
     <ClInclude Include="LeakyMediaControls.window.h" />
@@ -151,6 +153,7 @@
     <ClInclude Include="win32_abstraction.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="config.cpp" />
     <ClCompile Include="LeakyMediaControls.cpp" />
     <ClCompile Include="LeakyMediaControls.window.cpp" />
     <ClCompile Include="SoundDeviceEndpoint.cpp" />
