@@ -21,9 +21,10 @@ UINT g_toggleDefaultSoundOutputDeviceHotkey = VK_F6;
 #include <iostream>
 #include <sstream>
 
+namespace fs = std::experimental::filesystem;
+
 namespace leakymediacontrols
 {
-
 	class hotkey_binding
 	{
 	public:
@@ -42,10 +43,19 @@ namespace leakymediacontrols
 
 	std::vector<hotkey_binding> g_hotkeyBindings;
 
-	void Initialize()
+	void WriteDefaultConfigFile(fs::path const & configFilePath)
 	{
-		namespace fs = std::experimental::filesystem;
+		std::ofstream configFile;
+		configFile.open(configFilePath);
+		configFile << "[settings]" << std::endl;
+		configFile << R"(; See keycodes here, https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes)" << std::endl;
+		configFile << "prevTrackKeycode = 112" << std::endl;
+		configFile << "nextTrackKeycode = 113" << std::endl;
+		configFile << "toggleSoundOutput = 118" << std::endl;
+	}
 
+	std::unique_ptr<INIReader> ReadOrMakeConfigFile()
+	{
 		// AppData
 		CComHeapPtr<WCHAR> appdataPath;
 		THROW_IF_FAILED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_DEFAULT, NULL, &appdataPath));
@@ -54,28 +64,39 @@ namespace leakymediacontrols
 		fs::create_directories(dataDirectory);
 
 		auto configFile = dataDirectory / L"config.ini";
-
-		INIReader reader(configFile.string());
-
-		if (reader.ParseError() < 0) 
+		if (!fs::exists(configFile))
 		{
-			throw win32_abstraction::exception(L"Can't parse config.ini");
+			WriteDefaultConfigFile(configFile);
 		}
 
-		auto g_prevSongHotkey = reader.GetInteger("settings", "prevTrackKeycode", -1);
+		auto reader = std::make_unique<INIReader>(configFile.string());
+		if (reader->ParseError() < 0)
+		{
+			std::wstringstream ss;
+			ss << L"Can't parse config.ini.  Delete it and relaunch.  Location: " << configFile.string().c_str();
+			throw win32_abstraction::exception(ss.str());
+		}
+		return reader;
+	}
+
+	void Initialize()
+	{
+		auto reader = ReadOrMakeConfigFile();
+
+		auto g_prevSongHotkey = reader->GetInteger("settings", "prevTrackKeycode", -1);
 		if (g_prevSongHotkey == -1)
 		{
 			g_prevSongHotkey = VK_F1;
 		}
 		
 
-		auto g_nextSongHotkey = reader.GetInteger("settings", "nextTrackKeycode", -1);
+		auto g_nextSongHotkey = reader->GetInteger("settings", "nextTrackKeycode", -1);
 		if (g_nextSongHotkey == -1)
 		{
 			g_nextSongHotkey = VK_F2;
 		}
 
-		auto g_toggleDefaultSoundOutputDeviceHotkey = reader.GetInteger("settings", "toggleSoundOutput", -1);
+		auto g_toggleDefaultSoundOutputDeviceHotkey = reader->GetInteger("settings", "toggleSoundOutput", -1);
 		if (g_toggleDefaultSoundOutputDeviceHotkey == -1)
 		{
 			g_toggleDefaultSoundOutputDeviceHotkey = VK_F6;
