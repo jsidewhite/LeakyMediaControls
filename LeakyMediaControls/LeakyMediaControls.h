@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+#include <map>
 #include <string>
 #include "win32_abstraction.h"
 
@@ -11,9 +13,26 @@ extern UINT g_prevSongHotkey;
 extern UINT g_nextSongHotkey;
 extern UINT g_toggleDefaultSoundOutputDeviceHotkey;
 
+class hotkey_binding
+{
+public:
+	UINT m_hotkey;
+	std::function<void()> m_action;
+
+	hotkey_binding(UINT hotkey, std::function<void()> const & action) : m_hotkey(hotkey), m_action(std::move(action))
+	{
+	}
+
+	void operator() ()
+	{
+		m_action();
+	}
+};
 
 namespace leakymediacontrols
 {
+	extern std::map<std::wstring, hotkey_binding> g_hotkeyBindings;
+
 	void Initialize();
 	void RegisterHotkeys(HWND hWnd);
 	void HandleHotkeyPress(UINT hotkey);

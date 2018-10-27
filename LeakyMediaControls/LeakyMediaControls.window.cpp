@@ -15,15 +15,18 @@ namespace leakymediacontrols
 
 	void FillWindow(HWND hwnd)
 	{
-		std::wstring prevKey(L"n/a");
-		if (g_prevSongHotkey == VK_F1)
-		{
-			prevKey = std::wstring(L"F1");
-		}
+		//std::wstring prevKey(L"n/a");
+		//if (g_prevSongHotkey == VK_F1)
+		//{
+			//prevKey = std::wstring(L"F1");
+		//}
+
+		auto prevTrackBinding = g_hotkeyBindings.find(L"PreviousTrack");
+		auto pk = std::to_wstring(prevTrackBinding->second.m_hotkey);
 
 		CreateWindow(TEXT("STATIC"), TEXT("Previous Song Hotkey"), WS_VISIBLE | WS_CHILD | BS_TEXT, 10, 10, 160, 25, hwnd, (HMENU)1, GetModuleHandle(NULL), NULL);
 
-		CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", prevKey.c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 10, 40, 30, 21, hwnd, NULL, NULL, NULL);
+		CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", pk.c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 10, 40, 30, 21, hwnd, NULL, NULL, NULL);
 
 		CreateWindow(TEXT("button"), TEXT("Set Key"), WS_VISIBLE | WS_CHILD | BS_TEXT, 10, 70, 80, 25, hwnd, (HMENU)1, GetModuleHandle(NULL), NULL);
 

@@ -46,4 +46,10 @@ namespace win32_abstraction
 			throw exception(L"Couldn't send keystroke");
 		}
 	}
+
+	class virtual_key_code
+	{
+		int keycode;
+		std::wstring name;
+	};
 }
