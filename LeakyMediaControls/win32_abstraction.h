@@ -69,8 +69,9 @@ namespace win32_abstraction
 			{ VK_F8, L"F8" },
 			{ VK_F9, L"F9" },
 			{ VK_F10, L"F10" },
-			{ VK_F11, L"F11" }, 
+			{ VK_F11, L"F11" },
 			{ VK_F12, L"F12" },
+			{ VK_F13, L"F13" },
 		};
 
 		auto hit = std::find_if(vkcs.begin(), vkcs.end(), [keycode](auto const & vkc) {

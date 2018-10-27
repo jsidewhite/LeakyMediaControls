@@ -66,6 +66,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 	{
 		int wmId = LOWORD(wParam);
+
+		if (leakymediacontrols::WndProc(hwnd, wmId))
+		{
+			return 0;
+		}
+
 		// Parse the menu selections:
 		switch (wmId)
 		{
