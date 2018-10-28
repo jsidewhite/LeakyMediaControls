@@ -143,7 +143,7 @@ namespace leakymediacontrols
 
 	bool WndProc(HWND hwnd, UINT id)
 	{
-		MessageBox(hwnd, TEXT("Button Pressed"), TEXT(""), 0);
+		//MessageBox(hwnd, TEXT("Button Pressed"), TEXT(""), 0);
 
 		switch (id)
 		{
