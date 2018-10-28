@@ -23,8 +23,26 @@ UINT g_toggleDefaultSoundOutputDeviceHotkey = VK_F6;
 
 namespace fs = std::experimental::filesystem;
 
+std::vector<a_hotkey_shape_data> g_theHotkeyShapeDatas = {
+	{ L"PreviousTrack",					VK_F1,	[]() { win32_abstraction::SendKeyStroke(VK_MEDIA_PREV_TRACK); } },
+	{ L"NextTrack",						VK_F2,	[]() { win32_abstraction::SendKeyStroke(VK_MEDIA_NEXT_TRACK); } },
+	{ L"ToggleSoundOutputDevice",		VK_F6,	[]() { ToggleSoundDeviceEndpoint(); } },
+};
+
 namespace leakymediacontrols
 {
+	namespace details
+	{
+		static std::string to_string(std::wstring const & wstr)
+		{
+			// Super dirty and lame conversion
+			std::vector<char> chars(wstr.size());
+			std::transform(wstr.begin(), wstr.end(), chars.begin(), [](auto const & ch) {
+				return static_cast<char>(ch);
+			});
+			return { chars.data() };
+		}
+	}
 
 	std::map<std::wstring, hotkey_binding> g_hotkeyBindings;
 
@@ -75,50 +93,28 @@ namespace leakymediacontrols
 	{
 		auto reader = ReadOrMakeConfigFile();
 
-		auto g_prevSongHotkey = reader->GetInteger("settings", "PreviousTrack", -1);
-		if (g_prevSongHotkey == -1)
+		for (auto const & aHotkeyShapeData : g_theHotkeyShapeDatas)
 		{
-			g_prevSongHotkey = VK_F1;
-		}
-		
-		auto g_nextSongHotkey = reader->GetInteger("settings", "NextTrack", -1);
-		if (g_nextSongHotkey == -1)
-		{
-			g_nextSongHotkey = VK_F2;
-		}
+			auto name = details::to_string(aHotkeyShapeData.name);
 
-		auto g_toggleDefaultSoundOutputDeviceHotkey = reader->GetInteger("settings", "ToggleSoundOutputDevice", -1);
-		if (g_toggleDefaultSoundOutputDeviceHotkey == -1)
-		{
-			g_toggleDefaultSoundOutputDeviceHotkey = VK_F6;
-		}
-
-		std::wstringstream ss;
-		ss << L" "<< g_toggleDefaultSoundOutputDeviceHotkey << L" " << VK_F6;
-		//MessageBox(hwnd, ss.str().c_str(), L"LeakyMediaControls failure", MB_OK);
-		//throw win32_abstraction::exception(ss.str().c_str());
-
-
-		// Assign bindings
-		if (g_prevSongHotkey > 0)
-		{
-			g_hotkeyBindings.emplace(L"PreviousTrack", hotkey_binding(g_prevSongHotkey, []() {
-				win32_abstraction::SendKeyStroke(VK_MEDIA_PREV_TRACK);
-			}));
-		}
-
-		if (g_nextSongHotkey != 0)
-		{
-			g_hotkeyBindings.emplace(L"NextTrack", hotkey_binding(g_nextSongHotkey, []() {
-				win32_abstraction::SendKeyStroke(VK_MEDIA_NEXT_TRACK);
-			}));
-		}
-
-		if (g_toggleDefaultSoundOutputDeviceHotkey != 0)
-		{
-			g_hotkeyBindings.emplace(L"ToggleSoundOutputDevice", hotkey_binding(g_toggleDefaultSoundOutputDeviceHotkey, []() {
-				ToggleSoundDeviceEndpoint();
-			}));
+			auto userDefinedHotkey = reader->GetInteger("settings", name, -1);
+			if (userDefinedHotkey == 0)
+			{
+				// skip registering hotkey (user has set the hotkey to zero, explicitly)
+				continue;
+			}
+			
+			if (userDefinedHotkey == -1)
+			{
+				// hotkey wasn't specified in config file at all, set it to the default value
+				userDefinedHotkey = aHotkeyShapeData.default_keycode;
+			}
+			
+			// make hotkey binding helper struct
+			auto hotkeyBinding = hotkey_binding(userDefinedHotkey, aHotkeyShapeData.action);
+			
+			// save it
+			g_hotkeyBindings.emplace(aHotkeyShapeData.name, hotkeyBinding);
 		}
 	}
 

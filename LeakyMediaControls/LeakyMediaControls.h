@@ -13,6 +13,13 @@ extern UINT g_prevSongHotkey;
 extern UINT g_nextSongHotkey;
 extern UINT g_toggleDefaultSoundOutputDeviceHotkey;
 
+struct a_hotkey_shape_data
+{
+	std::wstring name;
+	UINT default_keycode;
+	std::function<void()> action;
+};
+
 class hotkey_binding
 {
 public:
