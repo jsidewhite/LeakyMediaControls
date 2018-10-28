@@ -60,7 +60,7 @@ namespace leakymediacontrols
 		HICON icon = LoadIconW(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_KIRBY));
 		//HICON icon = LoadIconW(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON));
 		//HICON icon = LoadIconW(NULL, MAKEINTRESOURCE(IDI_LEAKYMEDIACONTROLS));
-		//HICON icon = LoadIconW(NULL, MAKEINTRESOURCE(IDC_LEAKYMEDIACONTROLS));
+		//HICON icon = LoadIconW(NULL, MAKEINTRESOURCE(IDC_LEAKYMEDIACONTROLS)); 
 
 		nid.hIcon = icon;
 		//nid.hIcon = LoadIconW(GetModuleHandle(NULL), L"LeakyMediaControls.ico");
@@ -71,13 +71,16 @@ namespace leakymediacontrols
 		Shell_NotifyIcon(NIM_ADD, &nid);
 	}
 
-	void DestroySystemTrayIcon(HWND hWnd)
+	void DestroySystemTrayIcon(HWND hwnd)
 	{
 		NOTIFYICONDATA nid;
 		nid.cbSize = sizeof(NOTIFYICONDATA);
-		nid.hWnd = hWnd;
+		nid.hWnd = hwnd;
 		nid.uID = 100;
-		Shell_NotifyIcon(NIM_DELETE, &nid);
+		if (FALSE == Shell_NotifyIcon(NIM_DELETE, &nid))
+		{
+			MessageBox(hwnd, TEXT("Shell_NotifyIcon failed"), TEXT(""), 0);
+		}
 	}
 
 	// Message handler for about box.

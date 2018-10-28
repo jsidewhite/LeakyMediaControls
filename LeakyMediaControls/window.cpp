@@ -94,10 +94,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		EndPaint(hwnd, &ps);
 	}
 	break;
-	case WM_DESTROY:
-
+	case WM_CLOSE:
 		leakymediacontrols::DestroySystemTrayIcon(hwnd);
-
+		PostQuitMessage(0);
+		break;
+	case WM_DESTROY:
+		leakymediacontrols::DestroySystemTrayIcon(hwnd);
 		PostQuitMessage(0);
 		break;
 	default:
