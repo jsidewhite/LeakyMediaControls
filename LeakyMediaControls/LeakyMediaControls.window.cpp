@@ -143,10 +143,18 @@ namespace leakymediacontrols
 
 	bool WndProc(HWND hwnd, UINT id)
 	{
+		MessageBox(hwnd, TEXT("Button Pressed"), TEXT(""), 0);
+
 		switch (id)
 		{
 		case 10001:
-			MessageBox(hwnd, TEXT("Button Pressed"), TEXT(""), 0);
+			UserAssignsNewHotkeyAndWriteConfig(L"PreviousTrack", 114);
+			return true;
+		case 10002:
+			UserAssignsNewHotkeyAndWriteConfig(L"NextTrack", 114);
+			return true;
+		case 10003:
+			UserAssignsNewHotkeyAndWriteConfig(L"ToggleSoundOutputDevice", 114);
 			return true;
 		}
 		return false;

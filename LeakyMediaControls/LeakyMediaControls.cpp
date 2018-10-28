@@ -23,11 +23,15 @@ UINT g_toggleDefaultSoundOutputDeviceHotkey = VK_F6;
 
 namespace fs = std::experimental::filesystem;
 
-std::vector<a_hotkey_shape_data> g_theHotkeyShapeDatas = {
+// holds the defaults
+std::vector<a_hotkey_shape_data> g_theHotkeyDefaultsDatas = {
 	{ L"PreviousTrack",					VK_F1,	[]() { win32_abstraction::SendKeyStroke(VK_MEDIA_PREV_TRACK); } },
 	{ L"NextTrack",						VK_F2,	[]() { win32_abstraction::SendKeyStroke(VK_MEDIA_NEXT_TRACK); } },
 	{ L"ToggleSoundOutputDevice",		VK_F6,	[]() { ToggleSoundDeviceEndpoint(); } },
 };
+
+// holds the actuals
+std::vector<a_hotkey_shape_data> g_theHotkeyDatas;
 
 namespace leakymediacontrols
 {
@@ -46,37 +50,49 @@ namespace leakymediacontrols
 
 	std::map<std::wstring, hotkey_binding> g_hotkeyBindings;
 
-	void WriteDefaultConfigFile(fs::path const & configFilePath)
-	{
-		std::ofstream configFile;
-		configFile.open(configFilePath);
-		configFile << "[settings]" << std::endl;
-		configFile << R"(; See keycodes here, https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes)" << std::endl;
-		configFile << "; To turn off a setting, set it to zero, e.g." << std::endl;
-		configFile << ";	prevTrackKeycode = 0" << std::endl;
-		configFile << ";" << std::endl;
-		configFile << "; 112 is the keycode for F1" << std::endl;
-		configFile << "; 113 is the keycode for F2" << std::endl;
-		configFile << "; 117 is the keycode for F6" << std::endl;
-		configFile << ";" << std::endl;
-		configFile << "PreviousTrack = 112" << std::endl;
-		configFile << "NextTrack = 113" << std::endl;
-		configFile << "ToggleSoundOutputDevice = 117" << std::endl;
-	}
-
-	std::unique_ptr<INIReader> ReadOrMakeConfigFile()
+	fs::path GetConfigFileDefaultPath()
 	{
 		// AppData
 		CComHeapPtr<WCHAR> appdataPath;
 		THROW_IF_FAILED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_DEFAULT, NULL, &appdataPath));
 
-		fs::path dataDirectory = fs::path(static_cast<LPWSTR>(appdataPath)) / L"LeakyMediaControls";
-		fs::create_directories(dataDirectory);
-
+		auto dataDirectory = fs::path(static_cast<LPWSTR>(appdataPath)) / L"LeakyMediaControls";
 		auto configFile = dataDirectory / L"config.ini";
+		return configFile;
+	}
+
+	void WriteConfigFile(fs::path const & configFilePath, std::vector<a_hotkey_shape_data> const & hotkeyBindings)
+	{
+		std::wofstream configFile;
+		configFile.open(configFilePath);
+		configFile << L"[settings]" << std::endl;
+		configFile << LR"(; See keycodes here, https://docs.microsoft.com/en-us/windows/desktop/inputdev/virtual-key-codes)" << std::endl;
+		configFile << L"; To turn off a setting, set it to zero, e.g." << std::endl;
+		configFile << L";	PreviousTrack = 0" << std::endl;
+		configFile << L";" << std::endl;
+		configFile << L"; 112 is the keycode for F1" << std::endl;
+		configFile << L"; 113 is the keycode for F2" << std::endl;
+		configFile << L"; 117 is the keycode for F6" << std::endl;
+		configFile << L";" << std::endl;
+
+		for (auto const & hotkeyBinding : hotkeyBindings)
+		{
+			configFile << hotkeyBinding.name << L" = " << hotkeyBinding.keycode << std::endl;
+		}
+	}
+
+	void WriteConfigFile(std::vector<a_hotkey_shape_data> const & hotkeyBindings)
+	{
+		auto configFile = GetConfigFileDefaultPath();
+		WriteConfigFile(GetConfigFileDefaultPath(), hotkeyBindings);
+	}
+
+	std::unique_ptr<INIReader> ReadOrMakeConfigFile()
+	{
+		auto configFile = GetConfigFileDefaultPath();
 		if (!fs::exists(configFile))
 		{
-			WriteDefaultConfigFile(configFile);
+			WriteConfigFile(configFile, g_theHotkeyDefaultsDatas);
 		}
 
 		auto reader = std::make_unique<INIReader>(configFile.string());
@@ -93,7 +109,7 @@ namespace leakymediacontrols
 	{
 		auto reader = ReadOrMakeConfigFile();
 
-		for (auto const & aHotkeyShapeData : g_theHotkeyShapeDatas)
+		for (auto const & aHotkeyShapeData : g_theHotkeyDefaultsDatas)
 		{
 			auto name = details::to_string(aHotkeyShapeData.name);
 
@@ -107,7 +123,7 @@ namespace leakymediacontrols
 			if (userDefinedHotkey == -1)
 			{
 				// hotkey wasn't specified in config file at all, set it to the default value
-				userDefinedHotkey = aHotkeyShapeData.default_keycode;
+				userDefinedHotkey = aHotkeyShapeData.keycode;
 			}
 			
 			// make hotkey binding helper struct
@@ -115,7 +131,28 @@ namespace leakymediacontrols
 			
 			// save it
 			g_hotkeyBindings.emplace(aHotkeyShapeData.name, hotkeyBinding);
+
+			// save it to the datas thiny too
+			auto aHotkeyData = aHotkeyShapeData;
+			aHotkeyData.keycode = userDefinedHotkey;
+			g_theHotkeyDatas.push_back(aHotkeyData);
 		}
+	}
+
+	void UserAssignsNewHotkeyAndWriteConfig(std::wstring name, UINT keycode)
+	{
+		auto hotkeyData = std::find_if(g_theHotkeyDatas.begin(), g_theHotkeyDatas.end(), [&](const auto & hotkeyData) {
+			return hotkeyData.name == name;
+		});
+
+		if (hotkeyData == g_theHotkeyDatas.end())
+		{
+			throw win32_abstraction::exception(L"Assigning hotkey to bogus action");
+		}
+
+		hotkeyData->keycode = keycode;
+
+		WriteConfigFile(g_theHotkeyDatas);
 	}
 
 	void RegisterHotkeys(HWND hwnd)

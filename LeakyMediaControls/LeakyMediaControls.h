@@ -16,7 +16,7 @@ extern UINT g_toggleDefaultSoundOutputDeviceHotkey;
 struct a_hotkey_shape_data
 {
 	std::wstring name;
-	UINT default_keycode;
+	UINT keycode;
 	std::function<void()> action;
 };
 
@@ -41,6 +41,7 @@ namespace leakymediacontrols
 	extern std::map<std::wstring, hotkey_binding> g_hotkeyBindings;
 
 	void Initialize();
+	void UserAssignsNewHotkeyAndWriteConfig(std::wstring name, UINT keycode);
 	void RegisterHotkeys(HWND hWnd);
 	void HandleHotkeyPress(UINT hotkey);
 }
