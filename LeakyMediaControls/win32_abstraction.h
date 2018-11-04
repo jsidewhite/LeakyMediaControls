@@ -6,6 +6,45 @@
 
 namespace win32_abstraction
 {
+	class virtual_key_code
+	{
+	public:
+		int keycode;
+		std::wstring name;
+	};
+
+	inline std::vector<virtual_key_code> const & GetVirtualKeycodes()
+	{
+		static std::vector<virtual_key_code> vkcs = {
+			{ VK_F1, L"F1" },
+			{ VK_F2, L"F2" },
+			{ VK_F3, L"F3" },
+			{ VK_F4, L"F4" },
+			{ VK_F5, L"F5" },
+			{ VK_F6, L"F6" },
+			{ VK_F7, L"F7" },
+			{ VK_F8, L"F8" },
+			{ VK_F9, L"F9" },
+			{ VK_F10, L"F10" },
+			{ VK_F11, L"F11" },
+			{ VK_F12, L"F12" },
+			{ VK_F13, L"F13" },
+			{ VK_F14, L"F14" },
+			{ VK_F15, L"F15" },
+			{ VK_F16, L"F16" },
+			{ VK_F17, L"F17" },
+			{ VK_F18, L"F18" },
+			{ VK_F19, L"F19" },
+			{ VK_F20, L"F20" },
+			{ VK_F21, L"F21" },
+			{ VK_F22, L"F22" },
+			{ VK_F23, L"F23" },
+			{ VK_F24, L"F24" },
+		};
+
+		return vkcs;
+	}
+
 	class exception : public std::exception
 	{
 	private:
@@ -49,32 +88,12 @@ namespace win32_abstraction
 		}
 	}
 
-	class virtual_key_code
-	{
-	public:
-		int keycode;
-		std::wstring name;
-	};
 
 	inline std::wstring GetVirtualKeycodeName(UINT keycode)
 	{
-		static std::vector<virtual_key_code> vkcs {
-			{ VK_F1, L"F1" },
-			{ VK_F2, L"F2" },
-			{ VK_F3, L"F3" },
-			{ VK_F4, L"F4" },
-			{ VK_F5, L"F5" },
-			{ VK_F6, L"F6" },
-			{ VK_F7, L"F7" },
-			{ VK_F8, L"F8" },
-			{ VK_F9, L"F9" },
-			{ VK_F10, L"F10" },
-			{ VK_F11, L"F11" },
-			{ VK_F12, L"F12" },
-			{ VK_F13, L"F13" },
-		};
+		auto vkcs = GetVirtualKeycodes();
 
-		auto hit = std::find_if(vkcs.begin(), vkcs.end(), [keycode](auto const & vkc) {
+		auto hit = std::find_if(vkcs.begin(), vkcs.end(), [&keycode](auto const & vkc) {
 			return vkc.keycode == keycode;
 		});
 
@@ -83,6 +102,22 @@ namespace win32_abstraction
 
 		return L"<n/a>";
 	}
+
+	inline UINT GetVirtualKeycode(std::wstring const & name)
+	{
+		auto vkcs = GetVirtualKeycodes();
+
+		auto hit = std::find_if(vkcs.begin(), vkcs.end(), [&name](auto const & vkc) {
+			return vkc.name == name;
+		});
+
+		if (hit != vkcs.end())
+			return (*hit).keycode;
+
+		return NULL;
+	}
+
+	
 
 	/*std::vector<virtual_key_code> GetVirtualKeycodes()
 	{

@@ -1,7 +1,34 @@
+#include <sstream>
 #include <windows.h>
 #include "LeakyMediaControls.window.h"
 #include "LeakyMediaControls.h"
 #include "resource.h"
+#include "inc.h"
+
+class EditBox
+{
+	
+public:
+	EditBox(std::wstring const & _name) : name(_name)
+	{
+		static UINT magicIdSeed = 10000;
+		magicId = magicIdSeed++;
+	}
+
+	std::wstring name;
+	UINT magicId;
+	HWND hwnd;
+};
+
+EditBox previousTrackEditbox = { L"PreviousTrack" };
+EditBox nextTrackEditbox = { L"NextTrack" };
+EditBox toggleDefaultSoundOutputDeviceHotkeyEditbox = { L"PreviousTrack" };
+
+std::vector<EditBox*> editboxes = {
+	&previousTrackEditbox,
+	&nextTrackEditbox,
+	&toggleDefaultSoundOutputDeviceHotkeyEditbox
+};
 
 namespace leakymediacontrols
 {
@@ -19,25 +46,27 @@ namespace leakymediacontrols
 
 		CreateWindow(TEXT("STATIC"), TEXT("Previous Song Hotkey"), WS_VISIBLE | WS_CHILD | BS_TEXT, 10, 10, 160, 25, hwnd, (HMENU)1, GetModuleHandle(NULL), NULL);
 
-		CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", prevKey.c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 10, 40, 30, 21, hwnd, NULL, NULL, NULL);
+		previousTrackEditbox.hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", prevKey.c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 10, 40, 30, 21, hwnd, NULL, NULL, NULL);
 
-		CreateWindow(TEXT("button"), TEXT("Set Key"), WS_VISIBLE | WS_CHILD | BS_TEXT, 10, 70, 80, 25, hwnd, (HMENU)10001, GetModuleHandle(NULL), NULL);
+		CreateWindow(TEXT("button"), TEXT("Set Key"), WS_VISIBLE | WS_CHILD | BS_TEXT, 10, 70, 80, 25, hwnd, (HMENU)previousTrackEditbox.magicId, GetModuleHandle(NULL), NULL);
+
 
 		auto nextKey = win32_abstraction::GetVirtualKeycodeName(g_hotkeyBindings.find(L"NextTrack")->second.m_hotkey);
 
 		CreateWindow(TEXT("STATIC"), TEXT("Next Song Hotkey"), WS_VISIBLE | WS_CHILD | BS_TEXT, 200, 10, 160, 25, hwnd, (HMENU)1, GetModuleHandle(NULL), NULL);
 
-		CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", nextKey.c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 200, 40, 30, 21, hwnd, NULL, NULL, NULL);
+		nextTrackEditbox.hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", nextKey.c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 200, 40, 30, 21, hwnd, NULL, NULL, NULL);
 
-		CreateWindow(TEXT("button"), TEXT("Set Key"), WS_VISIBLE | WS_CHILD | BS_TEXT, 200, 70, 80, 25, hwnd, (HMENU)10002, GetModuleHandle(NULL), NULL);
+		CreateWindow(TEXT("button"), TEXT("Set Key"), WS_VISIBLE | WS_CHILD | BS_TEXT, 200, 70, 80, 25, hwnd, (HMENU)nextTrackEditbox.magicId, GetModuleHandle(NULL), NULL);
+
 
 		auto toggleDefaultSoundOutputDevice = win32_abstraction::GetVirtualKeycodeName(g_hotkeyBindings.find(L"ToggleSoundOutputDevice")->second.m_hotkey);
 
 		CreateWindow(TEXT("STATIC"), TEXT("Toggle Default Sound Output Device Hotkey"), WS_VISIBLE | WS_CHILD | BS_TEXT, 400, 10, 320, 25, hwnd, (HMENU)1, GetModuleHandle(NULL), NULL);
 
-		CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", toggleDefaultSoundOutputDevice.c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 400, 40, 30, 21, hwnd, NULL, NULL, NULL);
+		toggleDefaultSoundOutputDeviceHotkeyEditbox.hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", toggleDefaultSoundOutputDevice.c_str(), WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 400, 40, 30, 21, hwnd, NULL, NULL, NULL);
 
-		CreateWindow(TEXT("button"), TEXT("Set Key"), WS_VISIBLE | WS_CHILD | BS_TEXT, 400, 70, 80, 25, hwnd, (HMENU)10003, GetModuleHandle(NULL), NULL);
+		CreateWindow(TEXT("button"), TEXT("Set Key"), WS_VISIBLE | WS_CHILD | BS_TEXT, 400, 70, 80, 25, hwnd, (HMENU)toggleDefaultSoundOutputDeviceHotkeyEditbox.magicId, GetModuleHandle(NULL), NULL);
 
 		CheckDlgButton(hwnd, 1, BST_UNCHECKED);
 
@@ -143,19 +172,20 @@ namespace leakymediacontrols
 
 	bool WndProc(HWND hwnd, UINT id)
 	{
-		//MessageBox(hwnd, TEXT("Button Pressed"), TEXT(""), 0);
-
-		switch (id)
+		for (auto & editbox : editboxes)
 		{
-		case 10001:
-			UserAssignsNewHotkeyAndWriteConfig(L"PreviousTrack", 114);
-			return true;
-		case 10002:
-			UserAssignsNewHotkeyAndWriteConfig(L"NextTrack", 114);
-			return true;
-		case 10003:
-			UserAssignsNewHotkeyAndWriteConfig(L"ToggleSoundOutputDevice", 114);
-			return true;
+			if (editbox->magicId == id)
+			{
+				wchar_t keycodeName[100];
+				THROW_IF_FAILED(SendMessage(editbox->hwnd, WM_GETTEXT, 100, (LPARAM)keycodeName));
+
+				UINT keycode = win32_abstraction::GetVirtualKeycode(keycodeName);
+
+				//MessageBox(hwnd, TEXT("Button Pressed"), TEXT(""), 0);
+
+				UserAssignsNewHotkeyAndWriteConfig(editbox->name, keycode);
+				return true;
+			}
 		}
 		return false;
 	}

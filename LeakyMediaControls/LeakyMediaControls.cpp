@@ -147,7 +147,16 @@ namespace leakymediacontrols
 
 		if (hotkeyData == g_theHotkeyDatas.end())
 		{
-			throw win32_abstraction::exception(L"Assigning hotkey to bogus action");
+			hotkeyData = std::find_if(g_theHotkeyDefaultsDatas.begin(), g_theHotkeyDefaultsDatas.end(), [&](const auto & hotkeyData) {
+				return hotkeyData.name == name;
+			});
+
+			if (hotkeyData == g_theHotkeyDatas.end())
+			{
+				throw win32_abstraction::exception(L"Assigning hotkey to bogus action");
+			}
+
+			g_theHotkeyDatas.push_back(*hotkeyData);
 		}
 
 		hotkeyData->keycode = keycode;
